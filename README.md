@@ -1,15 +1,17 @@
 # 🍺 Barleywine Static File Server
 
-A fast and efficient static file server built with Rust and the Rocket web framework. Barleywine serves files from a `webroot` directory with automatic MIME type detection and index.html support for directory requests.
+A fast and efficient static file server built with Rust and the Rocket web framework. Barleywine serves files from a `webroot` directory with automatic MIME type detection, index.html support for directory requests, and **automatic markdown-to-HTML conversion**.
 
 ## Features
 
 - ✨ **Static File Serving**: Serves any file from the `webroot` directory
-- 🏠 **Automatic Index Pages**: Serves `index.html` when directories are requested
+- 📝 **Markdown Conversion**: Automatically converts `.md` files to beautifully styled HTML
+- 🏠 **Automatic Index Pages**: Serves `index.html` or `index.md` when directories are requested
 - 🎯 **MIME Type Detection**: Automatically detects and sets correct MIME types based on file extensions
 - ⚡ **High Performance**: Built with Rust and Rocket for maximum efficiency
 - 🔒 **Security**: Files are served only from the designated webroot directory
 - 📱 **Cross-Platform**: Works on Windows, macOS, and Linux
+- 🎨 **Beautiful Styling**: Markdown files get responsive, clean HTML templates automatically
 
 ## Quick Start
 
@@ -41,9 +43,10 @@ A fast and efficient static file server built with Rust and the Rocket web frame
 
 4. **Access your files**
    - Open your browser to `http://localhost:8000`
-   - The server will automatically serve `webroot/index.html` if it exists
+   - The server will automatically serve `webroot/index.html` or `webroot/index.md` if they exist
    - Access any file directly: `http://localhost:8000/filename.ext`
-   - Access subdirectories: `http://localhost:8000/subdir/` (serves `subdir/index.html`)
+   - Access subdirectories: `http://localhost:8000/subdir/` (serves `subdir/index.html` or `subdir/index.md`)
+   - Markdown files are automatically converted to HTML: `http://localhost:8000/document.md`
 
 ## File Structure
 
@@ -51,13 +54,19 @@ A fast and efficient static file server built with Rust and the Rocket web frame
 barleywine/
 ├── src/
 │   └── main.rs          # Main server implementation
-├── webroot/             # Static files directory
+webroot/             # Static files directory
 │   ├── index.html       # Main page (served at /)
+│   ├── index.md         # Markdown main page (alternative to HTML)
+│   ├── sample.md        # Markdown files (auto-converted to HTML)
+│   ├── blog.md          # More markdown content
 │   ├── styles.css       # CSS files
 │   ├── script.js        # JavaScript files
 │   ├── test.txt         # Text files
-│   └── subdir/          # Subdirectories
-│       └── index.html   # Directory index pages
+│   ├── blog/            # Subdirectories
+│   │   ├── index.md     # Markdown directory index
+│   │   └── post-1.md    # Blog posts in markdown
+│   └── subdir/          # Mixed content directories
+│       └── index.html   # HTML directory index pages
 ├── Cargo.toml           # Rust dependencies
 └── README.md            # This file
 ```
@@ -69,6 +78,7 @@ Barleywine automatically detects MIME types based on file extensions:
 | Extension        | MIME Type                | Description                                  |
 | ---------------- | ------------------------ | -------------------------------------------- |
 | `.html`, `.htm`  | `text/html`              | HTML documents                               |
+| `.md`            | `text/html`              | Markdown files (converted to HTML)           |
 | `.css`           | `text/css`               | Stylesheets                                  |
 | `.js`            | `application/javascript` | JavaScript files                             |
 | `.json`          | `application/json`       | JSON data                                    |
@@ -102,6 +112,33 @@ Create `webroot/index.html`:
 </html>
 ```
 
+### Markdown Page
+
+Create `webroot/index.md`:
+
+````markdown
+# Welcome to My Site
+
+This **markdown file** will be automatically converted to HTML with beautiful styling!
+
+## Features
+
+- Easy to write and edit
+- Automatic HTML conversion
+- Responsive design
+- Syntax highlighting for code blocks
+
+```rust
+fn main() {
+    println!("Hello from Barleywine!");
+}
+```
+````
+
+Visit [/sample.md](/sample.md) for more examples.
+
+````
+
 ### Subdirectory with Index
 
 Create `webroot/blog/index.html`:
@@ -116,6 +153,21 @@ Create `webroot/blog/index.html`:
     <h1>Blog Posts</h1>
   </body>
 </html>
+````
+
+Or create `webroot/blog/index.md`:
+
+```markdown
+# My Blog
+
+Welcome to my blog! Here are the latest posts:
+
+## Recent Posts
+
+- [Getting Started with Rust](post-1.md)
+- [Web Development Tips](post-2.md)
+
+_This directory index is written in markdown and automatically converted to HTML._
 ```
 
 Access at: `http://localhost:8000/blog/`
@@ -124,6 +176,7 @@ Access at: `http://localhost:8000/blog/`
 
 - `http://localhost:8000/styles.css` - Serves CSS with `text/css` MIME type
 - `http://localhost:8000/script.js` - Serves JavaScript with `application/javascript`
+- `http://localhost:8000/document.md` - Converts markdown to HTML with `text/html`
 - `http://localhost:8000/image.png` - Serves PNG with `image/png`
 
 ## Configuration
@@ -190,6 +243,7 @@ cargo clippy
 
 - **Rocket 0.5.1**: Web framework for serving HTTP requests
 - **Tokio**: Async runtime for file operations
+- **markdown 1.0**: CommonMark compliant markdown parser for converting .md files to HTML
 
 ## License
 
@@ -223,6 +277,12 @@ This project is licensed under the terms specified in the LICENSE file.
 - File extension should match expected MIME type
 - Some browsers cache MIME type information
 
+**Markdown not converting:**
+
+- Ensure `.md` files are in the `webroot` directory
+- Check that markdown content is valid
+- Verify the `markdown` crate dependency is installed
+
 ### Getting Help
 
 If you encounter issues:
@@ -231,6 +291,8 @@ If you encounter issues:
 2. Verify your file paths and permissions
 3. Ensure your `webroot` directory structure is correct
 4. Test with simple HTML files first
+5. Try creating a simple `.md` file to test markdown conversion
+6. Check that both HTML and markdown index files work in directories
 
 ---
 
