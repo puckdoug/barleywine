@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barleywine Static Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+        .feature-list {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .feature-list ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .feature-list li {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍺 Barleywine Static File Server</h1>
+        <p>Welcome! This is a Rocket-powered static file server serving files from the <code>webroot</code> directory.</p>
+
+        <div class="feature-list">
+            <h3>Features:</h3>
+            <ul>
+                <li>Serves static files with proper MIME types</li>
+                <li>Automatically serves index.html for directory requests</li>
+                <li>Built with Rust and Rocket framework</li>
+                <li>Fast and efficient file serving</li>
+            </ul>
+        </div>
+
+        <p>Try adding more files to the <code>webroot</code> directory and accessing them through the browser!</p>
+
+        <p><small>Server running on Rocket 🚀</small></p>
+    </div>
+</body>
+</html>

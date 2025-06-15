@@ -1,0 +1,45 @@
+Barleywine Static Server - Test Text File
+==========================================
+
+This is a plain text file used to test MIME type detection in the Rocket static file server.
+
+When this file is requested, it should be served with the MIME type: text/plain
+
+Server Features Being Tested:
+-----------------------------
+- Static file serving from webroot directory
+- Automatic MIME type detection based on file extensions
+- Text file delivery (.txt extension)
+
+File Details:
+- Filename: test.txt
+- Expected MIME type: text/plain
+- Server: Rocket (Rust web framework)
+- Location: /webroot/test.txt
+
+Test Instructions:
+1. Start the Barleywine server
+2. Navigate to http://localhost:8000/test.txt
+3. Verify the file is served correctly
+4. Check browser developer tools to confirm MIME type
+
+Additional Test Files:
+- index.html (text/html)
+- styles.css (text/css)
+- script.js (application/javascript)
+- subdir/index.html (text/html)
+
+The Rocket NamedFile responder automatically detects MIME types based on file extensions,
+so this file should be served with the correct Content-Type header.
+
+ASCII Art Test:
+    ____             _                      _
+   | __ )  __ _ _ __| | ___ _   ___      _(_)_ __   ___
+   |  _ \ / _` | '__| |/ _ \ | | \ \ /\ / / | '_ \ / _ \
+   | |_) | (_| | |  | |  __/ |_| |\ V  V /| | | | |  __/
+   |____/ \__,_|_|  |_|\___|\__, | \_/\_/ |_|_| |_|\___|
+                            |___/
+
+🍺 Static File Server Test Complete! 🍺
+
+If you can read this content, the text file serving is working correctly.
