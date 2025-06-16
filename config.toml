@@ -1,0 +1,148 @@
+# Barleywine Configuration File
+# This file demonstrates the configuration options available for the Barleywine static file server
+
+[server]
+# Server binding configuration
+host = "127.0.0.1"
+port = 8000
+
+# Number of worker threads (defaults to number of CPU cores)
+workers = 4
+
+# Request timeout in seconds
+timeout = 30
+
+# Maximum request size in bytes (10MB)
+max_request_size = 10485760
+
+[logging]
+# Log level: error, warn, info, debug, trace
+level = "info"
+
+# Log file path (optional, defaults to stdout)
+# file = "logs/barleywine.log"
+
+# Enable access logging
+access_log = true
+
+# Log format: compact, pretty, json
+format = "pretty"
+
+[content]
+# Directory to serve static files from
+webroot = "webroot"
+
+# Default index files (checked in order)
+index_files = ["index.html", "index.md"]
+
+# Enable markdown to HTML conversion
+markdown_enabled = true
+
+# Markdown extensions to enable
+markdown_extensions = ["tables", "strikethrough", "task_lists", "autolinks"]
+
+[cache]
+# Enable caching for static files
+enabled = true
+
+# Cache duration in seconds (1 hour)
+duration = 3600
+
+# Cache control headers
+cache_control = "public, max-age=3600"
+
+[security]
+# Enable security headers
+security_headers = true
+
+# Allowed file extensions (empty means all allowed)
+allowed_extensions = []
+
+# Blocked file extensions
+blocked_extensions = [".env", ".git", ".svn", ".DS_Store"]
+
+# Enable CORS
+cors_enabled = false
+
+# CORS allowed origins (if enabled)
+cors_origins = ["*"]
+
+[performance]
+# Enable gzip compression
+compression = true
+
+# Compression level (1-9)
+compression_level = 6
+
+# Minimum file size to compress (in bytes)
+min_compress_size = 1024
+
+# Enable HTTP/2
+http2 = true
+
+[development]
+# Enable development mode features
+dev_mode = false
+
+# Enable hot reloading
+hot_reload = false
+
+# Enable debug routes
+debug_routes = false
+
+# Pretty print JSON responses
+pretty_json = true
+
+[limits]
+# Form data limit (1MB)
+forms = "1MiB"
+
+# JSON payload limit (1MB)
+json = "1MiB"
+
+# File upload limit (10MB)
+file = "10MiB"
+
+# Data limit (10MB)
+data = "10MiB"
+
+[template]
+# Custom HTML template for markdown conversion
+# If not specified, uses built-in template
+# custom_template = "templates/markdown.html"
+
+# Custom CSS file to include in markdown pages
+# custom_css = "assets/custom.css"
+
+# Custom JavaScript file to include in markdown pages
+# custom_js = "assets/custom.js"
+
+# Site title for generated pages
+site_title = "Barleywine Static Server"
+
+# Site description
+site_description = "A fast static file server with markdown support"
+
+[routes]
+# Custom route mappings
+# "/api" = "api-docs.md"
+# "/docs" = "documentation/"
+
+# Redirect rules
+# "/old-page" = "/new-page"
+
+[middleware]
+# Enable request logging middleware
+request_logging = true
+
+# Enable CORS middleware
+cors = false
+
+# Enable compression middleware
+compression = true
+
+# Enable security headers middleware
+security = true
+
+# Custom middleware (if implemented)
+# custom = ["rate_limiting", "auth"]
