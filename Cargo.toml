@@ -2,6 +2,7 @@
 name = "barleywine"
 version = "0.1.0"
 edition = "2024"
+description = "A high-performance web platform that doesn't get in your way."
 
 [dependencies]
 markdown = "1.0"

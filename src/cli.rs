@@ -4,9 +4,9 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
-    name = "barleywine",
-    about = "A high-performance web platform that doesn't get in your way.",
-    version = "0.1.0"
+    name = env!("CARGO_PKG_NAME"),
+    about = env!("CARGO_PKG_DESCRIPTION"),
+    version = env!("CARGO_PKG_VERSION")
 )]
 pub struct Cli {
     /// Specify a configuration file
