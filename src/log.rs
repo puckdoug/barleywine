@@ -10,9 +10,9 @@ pub fn setup_logging(cli: &Cli) {
     // For now, we'll just display the intended log level
     println!("🔧 Log level set to: {}", log_level);
 
-    // If a custom log file is specified, we could implement file logging here
-    if let Some(ref log_file) = cli.log {
-        println!("📋 Logging to file: {}", log_file.display());
+    // If a custom log directory is specified, we could implement file logging here
+    if let Some(ref log_dir) = cli.log {
+        println!("📋 Logging to directory: {}", log_dir.display());
         // TODO: Implement file logging if needed
         // For now, we'll just note it and continue with stdout logging
     }
@@ -43,20 +43,25 @@ pub fn valid_log_levels() -> &'static [&'static str] {
     &["error", "warn", "info", "debug", "trace"]
 }
 
-/// Initialize file logging (placeholder for future implementation)
+/// Initialize directory logging (placeholder for future implementation)
 #[allow(dead_code)]
-pub fn init_file_logging(log_file: &Path) -> Result<(), std::io::Error> {
-    // TODO: Implement actual file logging
+pub fn init_directory_logging(log_dir: &Path) -> Result<(), std::io::Error> {
+    // TODO: Implement actual file logging to directory
     // This could use libraries like `env_logger`, `tracing`, or `log4rs`
 
-    // For now, just verify the log file directory exists
-    if let Some(parent) = log_file.parent() {
-        if !parent.exists() {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                format!("Log directory does not exist: {}", parent.display()),
-            ));
-        }
+    // Verify the log directory exists
+    if !log_dir.exists() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("Log directory does not exist: {}", log_dir.display()),
+        ));
+    }
+
+    if !log_dir.is_dir() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("Path is not a directory: {}", log_dir.display()),
+        ));
     }
 
     Ok(())

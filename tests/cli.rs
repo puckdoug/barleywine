@@ -223,7 +223,7 @@ fn test_nonexistent_config_file() {
 }
 
 #[test]
-fn test_valid_log_file() {
+fn test_valid_log_directory() {
     let temp_dir = TempDir::new().unwrap();
     let webroot = temp_dir.child("webroot");
     webroot.create_dir_all().unwrap();
@@ -232,17 +232,17 @@ fn test_valid_log_file() {
     logs_dir.create_dir_all().unwrap();
 
     barleywine_cmd()
-        .args(&["--log", "logs/test.log", "--verify"])
+        .args(&["--log", "logs", "--verify"])
         .current_dir(temp_dir.path())
         .assert()
         .success()
-        .stdout(predicate::str::contains("Log file: logs/test.log"));
+        .stdout(predicate::str::contains("Log directory: logs"));
 }
 
 #[test]
-fn test_log_file_nonexistent_directory() {
+fn test_log_directory_nonexistent() {
     barleywine_cmd()
-        .args(&["--log", "baddir/test.log"])
+        .args(&["--log", "baddir"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("does not exist"));
@@ -267,7 +267,7 @@ fn test_multiple_valid_options() {
             "--loglevel",
             "debug",
             "--log",
-            "logs/test.log",
+            "logs",
             "--verify",
         ])
         .current_dir(temp_dir.path())
@@ -276,7 +276,7 @@ fn test_multiple_valid_options() {
         .stdout(predicate::str::contains("Configuration is valid!"))
         .stdout(predicate::str::contains("Config file: config.toml"))
         .stdout(predicate::str::contains("Log level: debug"))
-        .stdout(predicate::str::contains("Log file: logs/test.log"));
+        .stdout(predicate::str::contains("Log directory: logs"));
 }
 
 #[test]
@@ -292,7 +292,7 @@ fn test_default_values() {
         .success()
         .stdout(predicate::str::contains("Log level: info"))
         .stdout(predicate::str::contains("Config file: default"))
-        .stdout(predicate::str::contains("Log file: stdout"));
+        .stdout(predicate::str::contains("Log directory: stdout"));
 }
 
 #[test]
@@ -384,7 +384,7 @@ fn test_absolute_config_path() {
 }
 
 #[test]
-fn test_absolute_log_path() {
+fn test_absolute_log_directory() {
     let temp_dir = TempDir::new().unwrap();
     let webroot = temp_dir.child("webroot");
     webroot.create_dir_all().unwrap();
@@ -392,12 +392,10 @@ fn test_absolute_log_path() {
     let logs_dir = temp_dir.child("logs");
     logs_dir.create_dir_all().unwrap();
 
-    let log_file = logs_dir.child("test.log");
-    let absolute_path = log_file.path().to_str().unwrap();
+    let absolute_path = logs_dir.path().to_str().unwrap();
 
     barleywine_cmd()
         .args(&["--log", absolute_path, "--verify"])
-        .current_dir(temp_dir.path())
         .assert()
         .success()
         .stdout(predicate::str::contains("Configuration is valid!"));
@@ -458,7 +456,7 @@ fn test_configuration_with_complex_paths() {
             "--config",
             "config/environments/test.toml",
             "--log",
-            "var/log/barleywine/test.log",
+            "var/log/barleywine",
             "--verify",
         ])
         .current_dir(temp_dir.path())

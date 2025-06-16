@@ -21,7 +21,7 @@ pub struct Cli {
     #[structopt(long, default_value = "info")]
     pub loglevel: String,
 
-    /// Specify a different log file
+    /// Specify a log directory
     #[structopt(long, parse(from_os_str))]
     pub log: Option<PathBuf>,
 }
@@ -53,15 +53,19 @@ impl Cli {
             }
         }
 
-        // Validate log file directory exists if specified
-        if let Some(ref log_path) = self.log {
-            if let Some(parent) = log_path.parent() {
-                if !parent.exists() {
-                    return Err(format!(
-                        "Log file directory '{}' does not exist",
-                        parent.display()
-                    ));
-                }
+        // Validate log directory exists if specified
+        if let Some(ref log_dir) = self.log {
+            if !log_dir.exists() {
+                return Err(format!(
+                    "Cannot run without a log directory. The directory '{}' does not exist",
+                    log_dir.display()
+                ));
+            }
+            if !log_dir.is_dir() {
+                return Err(format!(
+                    "Cannot run without a log directory. The path '{}' is not a directory",
+                    log_dir.display()
+                ));
             }
         }
 
@@ -80,7 +84,7 @@ impl Cli {
         );
         println!("  Log level: {}", self.loglevel);
         println!(
-            "  Log file: {}",
+            "  Log directory: {}",
             self.log
                 .as_ref()
                 .map(|p| p.display().to_string())
