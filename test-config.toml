@@ -1,0 +1,81 @@
+# Test Configuration File for Barleywine
+# This file demonstrates custom configuration options
+
+[server]
+host = "0.0.0.0"
+port = 3000
+workers = 8
+timeout = 60
+max_request_size = 20971520 # 20MB
+
+[logging]
+level = "debug"
+file = "logs/test-barleywine.log"
+access_log = true
+format = "json"
+
+[content]
+webroot = "webroot"
+index_files = ["index.html", "index.md", "README.md"]
+markdown_enabled = true
+markdown_extensions = [
+  "tables",
+  "strikethrough",
+  "task_lists",
+  "autolinks",
+  "footnotes",
+]
+
+[cache]
+enabled = true
+duration = 7200                        # 2 hours
+cache_control = "public, max-age=7200"
+
+[security]
+security_headers = true
+allowed_extensions = [".html", ".css", ".js", ".md", ".txt", ".json", ".xml"]
+blocked_extensions = [
+  ".env",
+  ".git",
+  ".svn",
+  ".DS_Store",
+  ".htaccess",
+  ".config",
+]
+cors_enabled = true
+cors_origins = ["http://localhost:3000", "https://example.com"]
+
+[performance]
+compression = true
+compression_level = 9
+min_compress_size = 512
+http2 = true
+
+[development]
+dev_mode = true
+hot_reload = true
+debug_routes = true
+pretty_json = true
+
+[limits]
+forms = "2MiB"
+json = "2MiB"
+file = "50MiB"
+data = "50MiB"
+
+[template]
+# custom_template = "templates/custom.html"
+# custom_css = "assets/custom.css"
+# custom_js = "assets/custom.js"
+site_title = "Test Barleywine Server"
+site_description = "A test configuration for the Barleywine static file server"
+
+[routes]
+# Custom route mappings (empty for now)
+
+[middleware]
+request_logging = true
+cors = true
+compression = true
+security = true
+# custom = ["rate_limiting"]

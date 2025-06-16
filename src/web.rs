@@ -1,4 +1,4 @@
-use crate::log;
+use crate::{config, log};
 use rocket::fs::NamedFile;
 use rocket::http::uri::Origin;
 use rocket::response::{content::RawHtml, status::NotFound};
@@ -28,37 +28,47 @@ async fn files(
     remote_addr: Option<SocketAddr>,
     origin: &Origin<'_>,
 ) -> Result<FileResponse, NotFound<String>> {
-    let webroot = Path::new("webroot");
-    let mut path = webroot.join(&file);
+    let config = config::get_config();
+    let mut path = config.content.webroot.join(&file);
 
-    // If the path is a directory, try to serve index.html or index.md
+    // If the path is a directory, try to serve configured index files
     if path.is_dir() {
-        let html_index = path.join("index.html");
-        let md_index = path.join("index.md");
+        let mut found_index = false;
+        for index_file in &config.content.index_files {
+            let index_path = path.join(index_file);
+            if index_path.exists() {
+                path = index_path;
+                found_index = true;
+                break;
+            }
+        }
 
-        if html_index.exists() {
-            path = html_index;
-        } else if md_index.exists() {
-            path = md_index;
-        } else {
+        if !found_index {
             return Err(NotFound(format!(
-                "No index file found in directory: {}",
-                path.display()
+                "No index file found in directory: {}. Looking for: {:?}",
+                path.display(),
+                config.content.index_files
             )));
         }
     }
 
-    // If no file segments provided, try to serve webroot/index.html or webroot/index.md
+    // If no file segments provided, try to serve configured index files from webroot
     if file.components().count() == 0 {
-        let html_index = webroot.join("index.html");
-        let md_index = webroot.join("index.md");
+        let mut found_index = false;
+        for index_file in &config.content.index_files {
+            let index_path = config.content.webroot.join(index_file);
+            if index_path.exists() {
+                path = index_path;
+                found_index = true;
+                break;
+            }
+        }
 
-        if html_index.exists() {
-            path = html_index;
-        } else if md_index.exists() {
-            path = md_index;
-        } else {
-            return Err(NotFound("No index file found".to_string()));
+        if !found_index {
+            return Err(NotFound(format!(
+                "No index file found. Looking for: {:?}",
+                config.content.index_files
+            )));
         }
     }
 
@@ -79,11 +89,13 @@ async fn files(
         .unwrap_or_else(|| "unknown".to_string());
     log::log_access(&addr_str, "GET", origin.path().as_str(), 200, None);
 
-    // Handle markdown files
-    if let Some(extension) = path.extension() {
-        if extension == "md" {
-            log::log_file_served(&path.display().to_string(), "markdown");
-            return serve_markdown_file(&path).await;
+    // Handle markdown files (if enabled)
+    if config.content.markdown_enabled {
+        if let Some(extension) = path.extension() {
+            if extension == "md" {
+                log::log_file_served(&path.display().to_string(), "markdown");
+                return serve_markdown_file(&path).await;
+            }
         }
     }
 
@@ -106,35 +118,46 @@ async fn files(
 
 #[get("/")]
 async fn index(remote_addr: Option<SocketAddr>) -> Result<FileResponse, NotFound<String>> {
-    let webroot = Path::new("webroot");
-    let html_index = webroot.join("index.html");
-    let md_index = webroot.join("index.md");
+    let config = config::get_config();
 
     // Log access to root
     let addr_str = remote_addr
         .map(|addr| addr.to_string())
         .unwrap_or_else(|| "unknown".to_string());
 
-    if html_index.exists() {
-        log::log_access(&addr_str, "GET", "/", 200, None);
-        match NamedFile::open(&html_index).await {
-            Ok(file) => {
-                log::log_file_served("index.html", "static");
-                Ok(FileResponse::Static(file))
-            }
-            Err(_) => {
-                log::log_access(&addr_str, "GET", "/", 500, None);
-                Err(NotFound("Could not open index.html".to_string()))
+    // Try each configured index file in order
+    for index_file in &config.content.index_files {
+        let index_path = config.content.webroot.join(index_file);
+
+        if index_path.exists() {
+            log::log_access(&addr_str, "GET", "/", 200, None);
+
+            // Check if it's a markdown file and markdown is enabled
+            if config.content.markdown_enabled && index_file.ends_with(".md") {
+                log::log_file_served(index_file, "markdown");
+                return serve_markdown_file(&index_path).await;
+            } else if !index_file.ends_with(".md") {
+                // Serve as static file
+                match NamedFile::open(&index_path).await {
+                    Ok(file) => {
+                        log::log_file_served(index_file, "static");
+                        return Ok(FileResponse::Static(file));
+                    }
+                    Err(_) => {
+                        log::log_access(&addr_str, "GET", "/", 500, None);
+                        return Err(NotFound(format!("Could not open {}", index_file)));
+                    }
+                }
             }
         }
-    } else if md_index.exists() {
-        log::log_access(&addr_str, "GET", "/", 200, None);
-        log::log_file_served("index.md", "markdown");
-        serve_markdown_file(&md_index).await
-    } else {
-        log::log_access(&addr_str, "GET", "/", 404, None);
-        Err(NotFound("No index file found".to_string()))
     }
+
+    // No index file found
+    log::log_access(&addr_str, "GET", "/", 404, None);
+    Err(NotFound(format!(
+        "No index file found. Looking for: {:?}",
+        config.content.index_files
+    )))
 }
 
 async fn serve_markdown_file(path: &Path) -> Result<FileResponse, NotFound<String>> {

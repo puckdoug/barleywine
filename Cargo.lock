@@ -178,9 +178,11 @@ dependencies = [
  "markdown",
  "predicates",
  "rocket",
+ "serde",
  "simplelog",
  "structopt",
  "tokio",
+ "toml",
 ]
 
 [[package]]
