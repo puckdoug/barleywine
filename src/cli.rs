@@ -1,3 +1,4 @@
+use crate::log;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -34,14 +35,12 @@ impl Cli {
     /// Validate the parsed arguments
     pub fn validate(&self) -> Result<(), String> {
         // Validate log level
-        match self.loglevel.to_lowercase().as_str() {
-            "error" | "warn" | "info" | "debug" | "trace" => {}
-            _ => {
-                return Err(format!(
-                    "Invalid log level '{}'. Valid levels are: error, warn, info, debug, trace",
-                    self.loglevel
-                ))
-            }
+        if !log::is_valid_log_level(&self.loglevel) {
+            return Err(format!(
+                "Invalid log level '{}'. Valid levels are: {}",
+                self.loglevel,
+                log::valid_log_levels().join(", ")
+            ));
         }
 
         // Validate config file exists if specified

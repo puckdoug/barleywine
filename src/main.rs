@@ -1,4 +1,5 @@
 mod cli;
+mod log;
 mod web;
 
 use cli::Cli;
@@ -43,7 +44,7 @@ async fn main() {
     }
 
     // Setup logging based on CLI options
-    setup_logging(&cli);
+    log::setup_logging(&cli);
 
     // Print startup message
     println!("🍺 Starting Barleywine Static File Server...");
@@ -67,28 +68,5 @@ async fn main() {
     if let Err(e) = rocket.launch().await {
         eprintln!("❌ Failed to start server: {}", e);
         process::exit(1);
-    }
-}
-
-fn setup_logging(cli: &Cli) {
-    // Set log level based on CLI argument
-    let log_level = match cli.loglevel.to_lowercase().as_str() {
-        "error" => "error",
-        "warn" => "warn",
-        "info" => "info",
-        "debug" => "debug",
-        "trace" => "trace",
-        _ => "info", // fallback, though validation should catch this
-    };
-
-    // Note: Rocket logging can be configured via Rocket.toml or environment variables
-    // For now, we'll just display the intended log level
-    println!("🔧 Log level set to: {}", log_level);
-
-    // If a custom log file is specified, we could implement file logging here
-    if let Some(ref log_file) = cli.log {
-        println!("📋 Logging to file: {}", log_file.display());
-        // TODO: Implement file logging if needed
-        // For now, we'll just note it and continue with stdout logging
     }
 }
