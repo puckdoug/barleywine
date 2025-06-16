@@ -1,7 +1,10 @@
+use crate::log;
 use rocket::fs::NamedFile;
+use rocket::http::uri::Origin;
 use rocket::response::{content::RawHtml, status::NotFound};
 use rocket::{get, routes};
 use std::fs;
+use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 
 // Custom response type to handle both static files and generated HTML
@@ -20,7 +23,11 @@ impl<'r> rocket::response::Responder<'r, 'static> for FileResponse {
 }
 
 #[get("/<file..>")]
-async fn files(file: PathBuf) -> Result<FileResponse, NotFound<String>> {
+async fn files(
+    file: PathBuf,
+    remote_addr: Option<SocketAddr>,
+    origin: &Origin<'_>,
+) -> Result<FileResponse, NotFound<String>> {
     let webroot = Path::new("webroot");
     let mut path = webroot.join(&file);
 
@@ -57,37 +64,75 @@ async fn files(file: PathBuf) -> Result<FileResponse, NotFound<String>> {
 
     // Check if the file exists
     if !path.exists() {
+        // Log access attempt for non-existent file
+        let addr_str = remote_addr
+            .map(|addr| addr.to_string())
+            .unwrap_or_else(|| "unknown".to_string());
+        log::log_access(&addr_str, "GET", origin.path().as_str(), 404, None);
+
         return Err(NotFound(format!("File not found: {}", path.display())));
     }
+
+    // Log successful access
+    let addr_str = remote_addr
+        .map(|addr| addr.to_string())
+        .unwrap_or_else(|| "unknown".to_string());
+    log::log_access(&addr_str, "GET", origin.path().as_str(), 200, None);
 
     // Handle markdown files
     if let Some(extension) = path.extension() {
         if extension == "md" {
+            log::log_file_served(&path.display().to_string(), "markdown");
             return serve_markdown_file(&path).await;
         }
     }
 
     // Serve regular files
     match NamedFile::open(&path).await {
-        Ok(file) => Ok(FileResponse::Static(file)),
-        Err(_) => Err(NotFound(format!("Could not open file: {}", path.display()))),
+        Ok(file) => {
+            log::log_file_served(&path.display().to_string(), "static");
+            Ok(FileResponse::Static(file))
+        }
+        Err(_) => {
+            // Log access attempt for file that couldn't be opened
+            let addr_str = remote_addr
+                .map(|addr| addr.to_string())
+                .unwrap_or_else(|| "unknown".to_string());
+            log::log_access(&addr_str, "GET", origin.path().as_str(), 500, None);
+            Err(NotFound(format!("Could not open file: {}", path.display())))
+        }
     }
 }
 
 #[get("/")]
-async fn index() -> Result<FileResponse, NotFound<String>> {
+async fn index(remote_addr: Option<SocketAddr>) -> Result<FileResponse, NotFound<String>> {
     let webroot = Path::new("webroot");
     let html_index = webroot.join("index.html");
     let md_index = webroot.join("index.md");
 
+    // Log access to root
+    let addr_str = remote_addr
+        .map(|addr| addr.to_string())
+        .unwrap_or_else(|| "unknown".to_string());
+
     if html_index.exists() {
+        log::log_access(&addr_str, "GET", "/", 200, None);
         match NamedFile::open(&html_index).await {
-            Ok(file) => Ok(FileResponse::Static(file)),
-            Err(_) => Err(NotFound("Could not open index.html".to_string())),
+            Ok(file) => {
+                log::log_file_served("index.html", "static");
+                Ok(FileResponse::Static(file))
+            }
+            Err(_) => {
+                log::log_access(&addr_str, "GET", "/", 500, None);
+                Err(NotFound("Could not open index.html".to_string()))
+            }
         }
     } else if md_index.exists() {
+        log::log_access(&addr_str, "GET", "/", 200, None);
+        log::log_file_served("index.md", "markdown");
         serve_markdown_file(&md_index).await
     } else {
+        log::log_access(&addr_str, "GET", "/", 404, None);
         Err(NotFound("No index file found".to_string()))
     }
 }

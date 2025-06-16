@@ -1,6 +1,6 @@
-mod cli;
-mod log;
-mod web;
+pub mod cli;
+pub mod log;
+pub mod web;
 
 use cli::Cli;
 use std::path::Path;
@@ -44,7 +44,10 @@ async fn main() {
     }
 
     // Setup logging based on CLI options
-    log::setup_logging(&cli);
+    if let Err(e) = log::setup_logging(&cli) {
+        eprintln!("❌ Failed to initialize logging: {}", e);
+        process::exit(1);
+    }
 
     // Print startup message
     println!("🍺 Starting Barleywine Static File Server...");
@@ -64,9 +67,14 @@ async fn main() {
     }
 
     // Launch rocket server
+    log::log_server_startup(8000, "webroot/");
     let rocket = web::build_rocket();
     if let Err(e) = rocket.launch().await {
-        eprintln!("❌ Failed to start server: {}", e);
+        let error_msg = format!("Failed to start server: {}", e);
+        log::log_error(&error_msg);
+        eprintln!("❌ {}", error_msg);
+        log::log_server_shutdown();
+        log::flush_logs();
         process::exit(1);
     }
 }
