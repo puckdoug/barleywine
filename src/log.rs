@@ -19,7 +19,7 @@ pub fn setup_logging(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     // Create log directory if it doesn't exist
     if !log_dir.exists() {
         std::fs::create_dir_all(&log_dir)?;
-        println!("📁 Created log directory: {}", log_dir.display());
+        info!("📁 Created log directory: {}", log_dir.display());
     }
 
     // Set up the main application logger
@@ -86,9 +86,9 @@ fn init_file_loggers(log_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
     *BARLEYWINE_LOGGER.lock().unwrap() = Some(barleywine_file);
     *ACCESS_LOGGER.lock().unwrap() = Some(access_file);
 
-    println!("📋 Log files initialized:");
-    println!("  - General log: {}", barleywine_log.display());
-    println!("  - Access log: {}", access_log.display());
+    info!("📋 Log files initialized:");
+    info!("  - General log: {}", barleywine_log.display());
+    info!("  - Access log: {}", access_log.display());
 
     Ok(())
 }

@@ -3,6 +3,7 @@ pub mod config;
 pub mod log;
 pub mod web;
 
+use ::log::info;
 use cli::Cli;
 use std::process;
 
@@ -64,22 +65,22 @@ async fn main() {
         return;
     }
 
-    // Setup logging based on CLI options and config
+    // Setup logging based on CLI options and config (only after verify check)
     if let Err(e) = log::setup_logging(&cli) {
         eprintln!("❌ Failed to initialize logging: {}", e);
         process::exit(1);
     }
 
-    // Print startup message
-    println!("🍺 Starting Barleywine Static File Server...");
+    // Log startup information
+    info!("🍺 Starting Barleywine Static File Server...");
     if let Some(ref config_file) = cli.config {
-        println!("📝 Using config file: {}", config_file.display());
+        info!("📝 Using config file: {}", config_file.display());
     }
-    println!(
+    info!(
         "📁 Serving files from: {}",
         config.content.webroot.display()
     );
-    println!(
+    info!(
         "📝 Markdown conversion: {}",
         if config.content.markdown_enabled {
             "Enabled"
@@ -87,11 +88,11 @@ async fn main() {
             "Disabled"
         }
     );
-    println!(
+    info!(
         "🚀 Log level: {}",
         config.get_log_level(Some(&cli.loglevel))
     );
-    println!(
+    info!(
         "🌐 Server will bind to: {}:{}",
         config.server.host, config.server.port
     );

@@ -1,4 +1,5 @@
 use crate::log;
+use ::log::info;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -69,6 +70,7 @@ impl Cli {
             }
         }
 
+        info!("CLI arguments validated successfully");
         Ok(())
     }
 
