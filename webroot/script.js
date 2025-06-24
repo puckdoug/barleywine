@@ -1,8 +1,8 @@
-// Barleywine Static Server - Test JavaScript File
+// Barleywine Server - Test JavaScript File
 // This file tests MIME type detection for JavaScript files
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🍺 Barleywine Static Server - JavaScript loaded successfully!');
+    console.log('🍺 Barleywine Server - JavaScript loaded successfully!');
 
     // Add some interactive functionality to test JS execution
     initializeInteractivity();

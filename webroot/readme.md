@@ -1,4 +1,4 @@
-# 🍺 Barleywine Static File Server
+# 🍺 Barleywine Server
 
 Welcome to **Barleywine** - a blazing-fast static file server built with Rust and Rocket that automatically converts Markdown files to beautifully styled HTML!
 

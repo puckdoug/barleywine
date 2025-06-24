@@ -30,11 +30,11 @@ pub struct ServerConfig {
     /// Port to bind to
     pub port: u16,
     /// Number of worker threads
-    pub workers: Option<u32>,
+    pub workers: u32,
     /// Request timeout in seconds
-    pub timeout: Option<u64>,
+    pub timeout: u64,
     /// Maximum request size in bytes
-    pub max_request_size: Option<u64>,
+    pub max_request_size: u64,
 }
 
 /// Logging configuration
@@ -42,8 +42,8 @@ pub struct ServerConfig {
 pub struct LoggingConfig {
     /// Log level (error, warn, info, debug, trace)
     pub level: String,
-    /// Log file path (optional)
-    pub file: Option<PathBuf>,
+    /// Log file path
+    pub file: PathBuf,
     /// Whether to enable access logging
     pub access_log: bool,
     /// Log format: compact, pretty, json
@@ -132,11 +132,11 @@ pub struct LimitsConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TemplateConfig {
     /// Custom HTML template for markdown conversion
-    pub custom_template: Option<PathBuf>,
+    pub custom_template: PathBuf,
     /// Custom CSS file to include in markdown pages
-    pub custom_css: Option<PathBuf>,
+    pub custom_css: PathBuf,
     /// Custom JavaScript file to include in markdown pages
-    pub custom_js: Option<PathBuf>,
+    pub custom_js: PathBuf,
     /// Site title for generated pages
     pub site_title: String,
     /// Site description
@@ -166,7 +166,7 @@ pub struct MiddlewareConfig {
     /// Enable security headers middleware
     pub security: bool,
     /// Custom middleware
-    pub custom: Option<Vec<String>>,
+    pub custom: Vec<String>,
 }
 
 impl Default for Config {
@@ -175,13 +175,13 @@ impl Default for Config {
             server: ServerConfig {
                 host: "127.0.0.1".to_string(),
                 port: 8000,
-                workers: Some(4),
-                timeout: Some(30),
-                max_request_size: Some(10 * 1024 * 1024), // 10MB
+                workers: 4,
+                timeout: 30,
+                max_request_size: 10 * 1024 * 1024, // 10MB
             },
             logging: LoggingConfig {
                 level: "info".to_string(),
-                file: None,
+                file: PathBuf::from("logs/barleywine.log"),
                 access_log: true,
                 format: "pretty".to_string(),
             },
@@ -232,10 +232,10 @@ impl Default for Config {
                 data: "10MiB".to_string(),
             },
             template: TemplateConfig {
-                custom_template: None,
-                custom_css: None,
-                custom_js: None,
-                site_title: "Barleywine Static Server".to_string(),
+                custom_template: PathBuf::new(),
+                custom_css: PathBuf::new(),
+                custom_js: PathBuf::new(),
+                site_title: "Barleywine Server".to_string(),
                 site_description: "A fast static file server with markdown support".to_string(),
             },
             routes: RoutesConfig {
@@ -247,7 +247,7 @@ impl Default for Config {
                 cors: false,
                 compression: true,
                 security: true,
-                custom: None,
+                custom: vec![],
             },
         }
     }
@@ -325,34 +325,34 @@ impl Config {
             return Err(ConfigError::InvalidHost(self.server.host.clone()));
         }
 
-        // Validate log file directory if specified
-        if let Some(ref log_file) = self.logging.file {
-            if let Some(parent) = log_file.parent() {
-                if parent.exists() && !parent.is_dir() {
-                    return Err(ConfigError::LogDirectoryNotDirectory(parent.to_path_buf()));
-                }
+        // Validate log file directory
+        if let Some(parent) = self.logging.file.parent() {
+            if parent.exists() && !parent.is_dir() {
+                return Err(ConfigError::LogDirectoryNotDirectory(parent.to_path_buf()));
             }
         }
 
-        // Validate custom template file if specified
-        if let Some(ref template_file) = self.template.custom_template {
-            if !template_file.exists() {
-                return Err(ConfigError::CustomTemplateNotFound(template_file.clone()));
-            }
+        // Validate custom template file
+        if !self.template.custom_template.as_os_str().is_empty()
+            && !self.template.custom_template.exists()
+        {
+            return Err(ConfigError::CustomTemplateNotFound(
+                self.template.custom_template.clone(),
+            ));
         }
 
-        // Validate custom CSS file if specified
-        if let Some(ref css_file) = self.template.custom_css {
-            if !css_file.exists() {
-                return Err(ConfigError::CustomCssNotFound(css_file.clone()));
-            }
+        // Validate custom CSS file
+        if !self.template.custom_css.as_os_str().is_empty() && !self.template.custom_css.exists() {
+            return Err(ConfigError::CustomCssNotFound(
+                self.template.custom_css.clone(),
+            ));
         }
 
-        // Validate custom JS file if specified
-        if let Some(ref js_file) = self.template.custom_js {
-            if !js_file.exists() {
-                return Err(ConfigError::CustomJsNotFound(js_file.clone()));
-            }
+        // Validate custom JS file
+        if !self.template.custom_js.as_os_str().is_empty() && !self.template.custom_js.exists() {
+            return Err(ConfigError::CustomJsNotFound(
+                self.template.custom_js.clone(),
+            ));
         }
 
         // Validate compression level
@@ -382,12 +382,7 @@ impl Config {
     pub fn get_log_directory(&self, cli_log_dir: Option<&Path>) -> Option<PathBuf> {
         cli_log_dir
             .map(|p| p.to_path_buf())
-            .or_else(|| {
-                self.logging
-                    .file
-                    .as_ref()
-                    .and_then(|f| f.parent().map(|p| p.to_path_buf()))
-            })
+            .or_else(|| self.logging.file.parent().map(|p| p.to_path_buf()))
             .or_else(|| Some(PathBuf::from("logs")))
     }
 
@@ -430,13 +425,38 @@ impl Config {
             .any(|ext| ext == extension)
     }
 
+    /// Print configuration verification details
+    pub fn print_config(
+        &self,
+        config_file: Option<&Path>,
+        cli_log_level: Option<&str>,
+        cli_log_dir: Option<&Path>,
+        verify_only: bool,
+    ) {
+        println!("Barleywine Configuration:");
+        println!(
+            "  Config file: {}",
+            config_file
+                .map(|p| p.display().to_string())
+                .unwrap_or_else(|| "default".to_string())
+        );
+        println!("  Log level: {}", self.get_log_level(cli_log_level));
+        println!(
+            "  Log directory: {}",
+            self.get_log_directory(cli_log_dir)
+                .map(|p| p.display().to_string())
+                .unwrap_or_else(|| "stdout".to_string())
+        );
+        println!("  Verify only: {}", verify_only);
+    }
+
     /// Print configuration summary
     pub fn print_summary(&self) {
         println!("📋 Barleywine Configuration Summary:");
         println!("   Server:");
         println!("     Address: {}:{}", self.server.host, self.server.port);
-        println!("     Workers: {:?}", self.server.workers);
-        println!("     Timeout: {:?}s", self.server.timeout);
+        println!("     Workers: {}", self.server.workers);
+        println!("     Timeout: {}s", self.server.timeout);
 
         println!("   Content:");
         println!("     Webroot: {}", self.content.webroot.display());
@@ -445,7 +465,7 @@ impl Config {
 
         println!("   Logging:");
         println!("     Level: {}", self.logging.level);
-        println!("     File: {:?}", self.logging.file);
+        println!("     File: {}", self.logging.file.display());
         println!("     Access Log: {}", self.logging.access_log);
         println!("     Format: {}", self.logging.format);
 

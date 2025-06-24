@@ -1,4 +1,4 @@
-Barleywine Static Server - Test Text File
+Barleywine Server - Test Text File
 ==========================================
 
 This is a plain text file used to test MIME type detection in the Rocket static file server.

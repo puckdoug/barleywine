@@ -168,7 +168,7 @@ Controls HTML template and styling options:
 custom_template = "templates/custom.html"    # Custom HTML template (optional)
 custom_css = "assets/custom.css"            # Custom CSS file (optional)
 custom_js = "assets/custom.js"              # Custom JavaScript file (optional)
-site_title = "Barleywine Static Server"     # Default site title
+site_title = "Barleywine Server"     # Default site title
 site_description = "A fast static file server with markdown support"
 ```
 
@@ -176,7 +176,7 @@ site_description = "A fast static file server with markdown support"
 - `custom_template`: Path to custom HTML template for markdown rendering (optional)
 - `custom_css`: Path to custom CSS file to include in generated pages (optional)
 - `custom_js`: Path to custom JavaScript file to include in generated pages (optional)
-- `site_title`: Default title for generated pages (default: "Barleywine Static Server")
+- `site_title`: Default title for generated pages (default: "Barleywine Server")
 - `site_description`: Default description for generated pages
 
 ### [routes] - Custom Routes Configuration

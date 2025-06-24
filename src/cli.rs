@@ -73,25 +73,4 @@ impl Cli {
         info!("CLI arguments validated successfully");
         Ok(())
     }
-
-    /// Print configuration summary
-    pub fn print_config(&self) {
-        println!("Barleywine Configuration:");
-        println!(
-            "  Config file: {}",
-            self.config
-                .as_ref()
-                .map(|p| p.display().to_string())
-                .unwrap_or_else(|| "default".to_string())
-        );
-        println!("  Log level: {}", self.loglevel);
-        println!(
-            "  Log directory: {}",
-            self.log
-                .as_ref()
-                .map(|p| p.display().to_string())
-                .unwrap_or_else(|| "stdout".to_string())
-        );
-        println!("  Verify only: {}", self.verify);
-    }
 }

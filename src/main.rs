@@ -27,10 +27,12 @@ async fn main() {
 
     // Print configuration if verify mode
     if cli.verify {
-        println!("🍺 Barleywine Static File Server");
-        println!("Configuration verification:");
-        cli.print_config();
-        println!();
+        config.print_config(
+            cli.config.as_deref(),
+            Some(&cli.loglevel),
+            cli.log.as_deref(),
+            cli.verify,
+        );
         config.print_summary();
 
         // Verify webroot directory exists
@@ -72,7 +74,7 @@ async fn main() {
     }
 
     // Log startup information
-    info!("🍺 Starting Barleywine Static File Server...");
+    info!("🍺 Starting Barleywine...");
     if let Some(ref config_file) = cli.config {
         info!("📝 Using config file: {}", config_file.display());
     }

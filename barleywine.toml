@@ -20,7 +20,7 @@ max_request_size = 10485760
 level = "info"
 
 # Log file path (optional, defaults to stdout)
-# file = "logs/barleywine.log"
+file = "logs/barleywine.log"
 
 # Enable access logging
 access_log = true
@@ -118,7 +118,7 @@ data = "10MiB"
 # custom_js = "assets/custom.js"
 
 # Site title for generated pages
-site_title = "Barleywine Static Server"
+site_title = "Barleywine Server"
 
 # Site description
 site_description = "A fast static file server with markdown support"

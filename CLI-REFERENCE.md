@@ -224,7 +224,7 @@ CMD ["barleywine", "--config", "config.toml", "--loglevel", "info"]
 ### Systemd Service
 ```ini
 [Unit]
-Description=Barleywine Static Server
+Description=Barleywine Server
 After=network.target
 
 [Service]

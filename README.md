@@ -1,4 +1,4 @@
-# 🍺 Barleywine Static File Server
+# 🍺 Barleywine Server
 
 A fast and efficient static file server built with Rust and the Rocket web framework. Barleywine serves files from a `webroot` directory with automatic MIME type detection, index.html support for directory requests, and **automatic markdown-to-HTML conversion**.
 
@@ -246,7 +246,7 @@ The `--verify` flag allows you to test your configuration without starting the s
 ```bash
 $ cargo run -- --verify
 
-🍺 Barleywine Static File Server
+🍺 Barleywine Server
 Configuration verification:
 Barleywine Configuration:
   Config file: default
